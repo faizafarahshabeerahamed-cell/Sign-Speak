@@ -1,0 +1,16 @@
+{
+  "classes": [
+    "good",
+    "hello",
+    "help",
+    "sorry",
+    "stop",
+    "study",
+    "thankyou",
+    "today",
+    "welcome",
+    "work"
+  ],
+  "sequence_length": 20,
+  "feature_count": 226
+}
