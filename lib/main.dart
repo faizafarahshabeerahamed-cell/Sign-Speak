@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:math' as math;
+
 import 'package:http/http.dart' as http;
+
 import 'dart:js_interop';
 import 'dart:typed_data';
 
@@ -51,8 +54,13 @@ class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   void _openMedia(BuildContext context) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => const MediaPage()));
+  }
+
+  void _openQuest(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const MediaPage()),
+      MaterialPageRoute(builder: (_) => const MediaPage(startInQuest: true)),
     );
   }
 
@@ -141,6 +149,7 @@ class HomePage extends StatelessWidget {
                             builder: (context, constraints) {
                               final hero = _HeroSection(
                                 onStart: () => _openMedia(context),
+                                onQuest: () => _openQuest(context),
                                 onVision: () => _showVision(context),
                               );
 
@@ -168,6 +177,8 @@ class HomePage extends StatelessWidget {
                               );
                             },
                           ),
+                          const SizedBox(height: 82),
+                          const _SignAvatarShowcase(),
                           const SizedBox(height: 72),
                           const _StatRail(),
                           const SizedBox(height: 96),
@@ -177,9 +188,7 @@ class HomePage extends StatelessWidget {
                           const SizedBox(height: 92),
                           const _PrinciplesSection(),
                           const SizedBox(height: 78),
-                          _ClosingBanner(
-                            onStart: () => _openMedia(context),
-                          ),
+                          _ClosingBanner(onStart: () => _openMedia(context)),
                           const SizedBox(height: 48),
                           const _Footer(),
                         ],
@@ -213,11 +222,7 @@ class _Header extends StatelessWidget {
               BoxShadow(color: Color(0x443D3016), blurRadius: 25),
             ],
           ),
-          child: const Icon(
-            Icons.waves_rounded,
-            color: ink,
-            size: 26,
-          ),
+          child: const Icon(Icons.waves_rounded, color: ink, size: 26),
         ),
         const SizedBox(width: 12),
         const Text(
@@ -262,10 +267,12 @@ class _Header extends StatelessWidget {
 class _HeroSection extends StatelessWidget {
   const _HeroSection({
     required this.onStart,
+    required this.onQuest,
     required this.onVision,
   });
 
   final VoidCallback onStart;
+  final VoidCallback onQuest;
   final VoidCallback onVision;
 
   @override
@@ -311,11 +318,7 @@ class _HeroSection extends StatelessWidget {
           'SignSpeak is exploring a more natural way to understand '
           'Indian Sign Language. A gesture, a glance, a movement of the '
           'hands—each can be part of a conversation.',
-          style: TextStyle(
-            color: muted,
-            fontSize: 15,
-            height: 1.8,
-          ),
+          style: TextStyle(color: muted, fontSize: 15, height: 1.8),
         ),
         const SizedBox(height: 29),
         Wrap(
@@ -340,6 +343,27 @@ class _HeroSection extends StatelessWidget {
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(13),
+                ),
+              ),
+            ),
+            OutlinedButton.icon(
+              onPressed: onQuest,
+              icon: const Icon(Icons.emoji_events_rounded, size: 17),
+              label: const Text('SIGN QUEST'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: goldLight,
+                side: const BorderSide(color: gold),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 18,
+                  vertical: 17,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                textStyle: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
                 ),
               ),
             ),
@@ -396,11 +420,7 @@ class _HeroArtwork extends StatelessWidget {
         border: Border.all(color: const Color(0xFF4A402C)),
         borderRadius: BorderRadius.circular(28),
         boxShadow: const [
-          BoxShadow(
-            color: Color(0x223E321A),
-            blurRadius: 60,
-            spreadRadius: 4,
-          ),
+          BoxShadow(color: Color(0x223E321A), blurRadius: 60, spreadRadius: 4),
         ],
       ),
       child: Column(
@@ -418,10 +438,7 @@ class _HeroArtwork extends StatelessWidget {
               ),
               const Spacer(),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 9,
-                  vertical: 6,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
                 decoration: BoxDecoration(
                   color: const Color(0xFF292216),
                   borderRadius: BorderRadius.circular(20),
@@ -578,9 +595,17 @@ class _StatRail extends StatelessWidget {
         spacing: 38,
         runSpacing: 20,
         children: [
-          _StatItem(number: '01', label: 'LANGUAGE', value: 'Indian Sign Language'),
+          _StatItem(
+            number: '01',
+            label: 'LANGUAGE',
+            value: 'Indian Sign Language',
+          ),
           _StatItem(number: '02', label: 'INPUT', value: 'Images and video'),
-          _StatItem(number: '03', label: 'PURPOSE', value: 'Shared understanding'),
+          _StatItem(
+            number: '03',
+            label: 'PURPOSE',
+            value: 'Shared understanding',
+          ),
         ],
       ),
     );
@@ -676,11 +701,7 @@ class _StorySection extends StatelessWidget {
               'create a welcoming place to explore ISL, with tools that can '
               'help bridge conversations between people who sign and people '
               'who are still learning.',
-              style: TextStyle(
-                color: muted,
-                fontSize: 14,
-                height: 1.8,
-              ),
+              style: TextStyle(color: muted, fontSize: 14, height: 1.8),
             ),
           ],
         );
@@ -698,11 +719,7 @@ class _StorySection extends StatelessWidget {
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            title,
-            const SizedBox(height: 22),
-            body,
-          ],
+          children: [title, const SizedBox(height: 22), body],
         );
       },
     );
@@ -762,7 +779,8 @@ class _ProcessSection extends StatelessWidget {
                     icon: Icons.center_focus_strong_rounded,
                     state: 'WORKING',
                     title: 'Find the hands',
-                    detail: 'The current prototype can detect hands in an image.',
+                    detail:
+                        'The current prototype can detect hands in an image.',
                   ),
                 ),
                 SizedBox(
@@ -772,7 +790,8 @@ class _ProcessSection extends StatelessWidget {
                     icon: Icons.translate_rounded,
                     state: 'IN DEVELOPMENT',
                     title: 'Understand the sign',
-                    detail: 'A custom ISL model will be needed to recognize signs.',
+                    detail:
+                        'A custom ISL model will be needed to recognize signs.',
                   ),
                 ),
               ],
@@ -848,11 +867,7 @@ class _ProcessCard extends StatelessWidget {
           const SizedBox(height: 9),
           Text(
             detail,
-            style: const TextStyle(
-              color: muted,
-              fontSize: 12,
-              height: 1.65,
-            ),
+            style: const TextStyle(color: muted, fontSize: 12, height: 1.65),
           ),
         ],
       ),
@@ -933,11 +948,7 @@ class _PrinciplesSection extends StatelessWidget {
 
           return const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              heading,
-              SizedBox(height: 28),
-              details,
-            ],
+            children: [heading, SizedBox(height: 28), details],
           );
         },
       ),
@@ -986,11 +997,7 @@ class _PrincipleRow extends StatelessWidget {
               const SizedBox(height: 5),
               Text(
                 text,
-                style: const TextStyle(
-                  color: muted,
-                  fontSize: 12,
-                  height: 1.6,
-                ),
+                style: const TextStyle(color: muted, fontSize: 12, height: 1.6),
               ),
             ],
           ),
@@ -1081,11 +1088,7 @@ class _ClosingBanner extends StatelessWidget {
 
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              content,
-              const SizedBox(height: 20),
-              button,
-            ],
+            children: [content, const SizedBox(height: 20), button],
           );
         },
       ),
@@ -1165,8 +1168,676 @@ class _GoldGlow extends StatelessWidget {
   }
 }
 
+class _SignAvatarShowcase extends StatefulWidget {
+  const _SignAvatarShowcase();
+
+  @override
+  State<_SignAvatarShowcase> createState() => _SignAvatarShowcaseState();
+}
+
+class _SignAvatarShowcaseState extends State<_SignAvatarShowcase>
+    with SingleTickerProviderStateMixin {
+  static const List<String> _topics = [
+    'Handshape',
+    'Movement',
+    'Location & direction',
+    'Face & body',
+  ];
+
+  static const List<IconData> _topicIcons = [
+    Icons.back_hand_rounded,
+    Icons.gesture_rounded,
+    Icons.open_with_rounded,
+    Icons.face_rounded,
+  ];
+
+  static const List<String> _topicDetails = [
+    'The shape of the hand and fingers can distinguish one sign from another. '
+        'A clear view of the fingers helps a viewer follow the gesture.',
+    'Direction, path, and repetition can carry meaning. A still photo cannot '
+        'show the full movement of a dynamic sign.',
+    'Signs can be formed near the face, torso, or in signing space. Palm '
+        'orientation and direction may also matter.',
+    'Facial expression and body posture can contribute grammar and tone. '
+        'Sign languages communicate through more than hands alone.',
+  ];
+
+  int _selectedTopic = 0;
+
+  late final AnimationController _motion = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1800),
+  )..repeat();
+
+  @override
+  void dispose() {
+    _motion.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        color: const Color(0xFF11100D),
+        border: Border.all(color: const Color(0xFF574A2B)),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: const [
+          BoxShadow(color: Color(0x224D421F), blurRadius: 34, spreadRadius: 1),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Row(
+            children: [
+              Icon(Icons.auto_awesome_rounded, color: gold, size: 19),
+              SizedBox(width: 10),
+              Expanded(child: _Eyebrow(text: 'SIGN LANGUAGE, IN MOTION')),
+              Text(
+                '3D-STYLE GUIDE',
+                style: TextStyle(
+                  color: goldLight,
+                  fontSize: 11,
+                  letterSpacing: 1.4,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth > 760;
+              final stageHeight = wide ? 390.0 : 330.0;
+              return Container(
+                height: stageHeight,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  gradient: const RadialGradient(
+                    center: Alignment(0, -0.25),
+                    radius: 0.9,
+                    colors: [Color(0xFF302718), Color(0xFF15130F)],
+                  ),
+                  border: Border.all(color: const Color(0xFF3B3323)),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: AnimatedBuilder(
+                        animation: _motion,
+                        builder: (context, _) => CustomPaint(
+                          painter: _AlignedSignerPainter(
+                            _motion.value,
+                            _selectedTopic,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Positioned(
+                      left: 16,
+                      top: 16,
+                      child: _AvatarTag(
+                        icon: Icons.motion_photos_on_rounded,
+                        text: 'EXPRESSIVE MOTION',
+                      ),
+                    ),
+                    const Positioned(
+                      right: 16,
+                      bottom: 16,
+                      child: _AvatarTag(
+                        icon: Icons.pan_tool_alt_rounded,
+                        text: 'ISL INSPIRED',
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 23),
+          const Text(
+            'Explore the building blocks of a sign.',
+            style: TextStyle(
+              color: ivory,
+              fontSize: 25,
+              fontWeight: FontWeight.w800,
+              height: 1.15,
+            ),
+          ),
+          const SizedBox(height: 9),
+          const Text(
+            'Tap a topic to explore it and see the signer animate that cue.',
+            style: TextStyle(color: muted, height: 1.65, fontSize: 15),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 9,
+            runSpacing: 9,
+            children: List.generate(_topics.length, (index) {
+              final selected = _selectedTopic == index;
+              return ChoiceChip(
+                avatar: Icon(
+                  _topicIcons[index],
+                  size: 16,
+                  color: selected ? ink : goldLight,
+                ),
+                label: Text(_topics[index]),
+                selected: selected,
+                onSelected: (_) => setState(() => _selectedTopic = index),
+                labelStyle: TextStyle(
+                  color: selected ? ink : ivory,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+                selectedColor: gold,
+                backgroundColor: const Color(0xFF191711),
+                side: BorderSide(
+                  color: selected ? gold : const Color(0xFF51452A),
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                showCheckmark: false,
+              );
+            }),
+          ),
+          const SizedBox(height: 13),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 220),
+            child: Container(
+              key: ValueKey<int>(_selectedTopic),
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF191711),
+                border: Border.all(color: const Color(0xFF51452A)),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(_topicIcons[_selectedTopic], color: gold, size: 21),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _topics[_selectedTopic],
+                          style: const TextStyle(
+                            color: goldLight,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          _topicDetails[_selectedTopic],
+                          style: const TextStyle(
+                            color: ivory,
+                            height: 1.55,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 13),
+          const Text(
+            'Learning note: these are general visual cues, not instructions '
+            'for performing a specific ISL sign. Sign forms vary; learn them '
+            'from qualified ISL teachers and trusted references. This '
+            'animated guide is decorative and does not demonstrate verified '
+            'ISL signs.',
+            style: TextStyle(
+              color: Color(0xFF817C70),
+              height: 1.5,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AvatarTag extends StatelessWidget {
+  const _AvatarTag({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xD90D0C0A),
+        border: Border.all(color: const Color(0x665F5438)),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: goldLight, size: 14),
+          const SizedBox(width: 7),
+          Text(
+            text,
+            style: const TextStyle(
+              color: ivory,
+              fontSize: 9,
+              letterSpacing: 1.1,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AlignedSignerPainter extends CustomPainter {
+  const _AlignedSignerPainter(this.phase, this.activeTopic);
+
+  final double phase;
+  final int activeTopic;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const designWidth = 360.0;
+    const designHeight = 370.0;
+    final scale = math.min(
+      size.width / designWidth,
+      size.height / designHeight,
+    );
+    final origin = Offset(
+      (size.width - designWidth * scale) / 2,
+      (size.height - designHeight * scale) / 2,
+    );
+    final motion = math.sin(phase * math.pi * 2);
+    final breath = math.cos(phase * math.pi * 2);
+    final movementBoost = activeTopic == 1 ? 2.1 : 1.0;
+    final locationLift = activeTopic == 2
+        ? 27 + 25 * (0.5 + 0.5 * breath)
+        : 0.0;
+    final fingerSpread = activeTopic == 0 ? 2.5 * (0.5 + 0.5 * motion) : 0.0;
+    final fingerCurl = activeTopic == 0 ? 5.0 * (0.5 + 0.5 * breath) : 0.0;
+    final expression = activeTopic == 3 ? 0.5 + 0.5 * motion : 0.0;
+
+    canvas.save();
+    canvas.translate(origin.dx, origin.dy);
+    canvas.scale(scale);
+
+    final halo = Paint()
+      ..shader = const RadialGradient(
+        colors: [Color(0x334D3A1D), Color(0x004D3A1D)],
+      ).createShader(Rect.fromCircle(center: Offset(180, 180), radius: 178));
+    canvas.drawRect(const Rect.fromLTWH(0, 0, designWidth, designHeight), halo);
+
+    final orbit = Paint()
+      ..color = gold.withValues(alpha: 0.22)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2;
+    canvas.drawArc(
+      const Rect.fromLTWH(47, 36, 266, 266),
+      -math.pi * 0.78 + phase * math.pi * 2,
+      math.pi * 0.66,
+      false,
+      orbit,
+    );
+    canvas.drawArc(
+      const Rect.fromLTWH(29, 58, 302, 254),
+      math.pi * 0.1 - phase * math.pi * 2,
+      math.pi * 0.48,
+      false,
+      orbit..color = gold.withValues(alpha: 0.11),
+    );
+
+    canvas.drawOval(
+      Rect.fromCenter(center: Offset(180, 355), width: 164, height: 17),
+      Paint()..color = Colors.black.withValues(alpha: 0.43),
+    );
+
+    // Neck joins the head and shoulders before the shirt is painted over its base.
+    final neck = RRect.fromRectAndRadius(
+      Rect.fromLTWH(164, 103, 32, 55),
+      const Radius.circular(13),
+    );
+    canvas.drawRRect(
+      neck,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+          colors: [Color(0xFF9B624C), Color(0xFFFFD0A5), Color(0xFFB7785B)],
+        ).createShader(neck.outerRect),
+    );
+
+    final torso = Path()
+      ..moveTo(133, 145)
+      ..quadraticBezierTo(180, 125, 227, 145)
+      ..quadraticBezierTo(246, 153, 253, 194)
+      ..lineTo(270, 346)
+      ..quadraticBezierTo(180, 364, 90, 346)
+      ..lineTo(107, 194)
+      ..quadraticBezierTo(114, 153, 133, 145)
+      ..close();
+    final torsoBounds = const Rect.fromLTRB(90, 125, 270, 364);
+    canvas.drawPath(
+      torso,
+      Paint()
+        ..shader = const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF53626A), Color(0xFF202D32), Color(0xFF11191C)],
+        ).createShader(torsoBounds),
+    );
+    canvas.drawPath(
+      torso,
+      Paint()
+        ..color = gold.withValues(alpha: 0.72)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+
+    // A restrained neckline gives the chest and shoulders clearer structure.
+    final neckline = Path()
+      ..moveTo(157, 139)
+      ..lineTo(180, 165)
+      ..lineTo(203, 139);
+    canvas.drawPath(
+      neckline,
+      Paint()
+        ..color = const Color(0xFF9D8A65)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.2
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+
+    final leftShoulder = Offset(137, 154 + breath * 1.5);
+    final rightShoulder = Offset(223, 154 + breath * 1.5);
+    final leftElbow = Offset(
+      111 - motion * 5 * movementBoost,
+      199 + motion * 4 * movementBoost,
+    );
+    final rightElbow = Offset(
+      249 + motion * 5 * movementBoost,
+      199 - motion * 4 * movementBoost,
+    );
+    final leftWrist = Offset(
+      146 - motion * 7 * movementBoost,
+      220 - locationLift + breath * 6 * movementBoost,
+    );
+    final rightWrist = Offset(
+      214 + motion * 7 * movementBoost,
+      220 - locationLift - breath * 6 * movementBoost,
+    );
+
+    _drawForearm(canvas, leftShoulder, leftElbow, leftWrist);
+    _drawForearm(canvas, rightShoulder, rightElbow, rightWrist);
+
+    // The palms sit directly on the forearm endpoints, keeping each hand attached.
+    _drawOpenHand(
+      canvas,
+      leftWrist,
+      -0.15 + motion * 0.11 * movementBoost,
+      true,
+      fingerSpread,
+      fingerCurl,
+    );
+    _drawOpenHand(
+      canvas,
+      rightWrist,
+      0.15 - motion * 0.11 * movementBoost,
+      false,
+      fingerSpread,
+      fingerCurl,
+    );
+
+    final headCenter = Offset(
+      180,
+      72 + breath * (activeTopic == 3 ? 2.5 : 1.1),
+    );
+    final headRect = Rect.fromCircle(center: headCenter, radius: 38);
+    canvas.drawOval(
+      headRect.shift(const Offset(1, 4)),
+      Paint()..color = Colors.black.withValues(alpha: 0.32),
+    );
+    canvas.drawOval(
+      headRect,
+      Paint()
+        ..shader = const RadialGradient(
+          center: Alignment(-0.35, -0.42),
+          colors: [Color(0xFFFFD6B4), Color(0xFFD99670), Color(0xFF8B5545)],
+          stops: [0, 0.7, 1],
+        ).createShader(headRect),
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: headCenter.translate(-38, 1),
+        width: 11,
+        height: 19,
+      ),
+      Paint()..color = const Color(0xFFC98262),
+    );
+    canvas.drawOval(
+      Rect.fromCenter(
+        center: headCenter.translate(38, 1),
+        width: 11,
+        height: 19,
+      ),
+      Paint()..color = const Color(0xFFC98262),
+    );
+
+    final hair = Path()
+      ..moveTo(143, 74)
+      ..quadraticBezierTo(135, 28, 177, 29)
+      ..quadraticBezierTo(218, 25, 218, 69)
+      ..quadraticBezierTo(206, 54, 191, 52)
+      ..quadraticBezierTo(171, 53, 154, 43)
+      ..quadraticBezierTo(154, 60, 143, 74)
+      ..close();
+    canvas.drawPath(hair, Paint()..color = const Color(0xFF191414));
+    canvas.drawPath(
+      hair,
+      Paint()
+        ..color = const Color(0xFF665044).withValues(alpha: 0.65)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.2,
+    );
+
+    final featurePaint = Paint()
+      ..color = const Color(0xFF4B3029)
+      ..strokeWidth = 1.8
+      ..strokeCap = StrokeCap.round
+      ..style = PaintingStyle.stroke;
+    final browLift = expression * 3.2;
+    canvas.drawLine(
+      Offset(163, 68 - browLift),
+      Offset(171, 68 - browLift),
+      featurePaint,
+    );
+    canvas.drawLine(
+      Offset(189, 68 - browLift),
+      Offset(197, 68 - browLift),
+      featurePaint,
+    );
+    canvas.drawCircle(
+      const Offset(167, 75),
+      1.7,
+      Paint()..color = const Color(0xFF30201C),
+    );
+    canvas.drawCircle(
+      const Offset(193, 75),
+      1.7,
+      Paint()..color = const Color(0xFF30201C),
+    );
+    canvas.drawLine(const Offset(180, 78), const Offset(179, 88), featurePaint);
+    if (expression > 0.68) {
+      canvas.drawOval(
+        Rect.fromCenter(center: const Offset(180, 96), width: 12, height: 7),
+        Paint()..color = const Color(0xFF75463D),
+      );
+      canvas.drawOval(
+        Rect.fromCenter(center: const Offset(180, 95), width: 8, height: 2.2),
+        Paint()..color = const Color(0xFFFFD3AE),
+      );
+    } else {
+      final smile = Path()
+        ..moveTo(171, 94)
+        ..quadraticBezierTo(180, 98 + expression * 4, 189, 94);
+      canvas.drawPath(smile, featurePaint);
+    }
+
+    canvas.restore();
+  }
+
+  void _drawForearm(
+    Canvas canvas,
+    Offset shoulder,
+    Offset elbow,
+    Offset wrist,
+  ) {
+    final path = Path()
+      ..moveTo(shoulder.dx, shoulder.dy)
+      ..quadraticBezierTo(elbow.dx, elbow.dy - 12, elbow.dx, elbow.dy)
+      ..quadraticBezierTo(elbow.dx, elbow.dy + 22, wrist.dx, wrist.dy);
+    final bounds = Rect.fromLTRB(
+      math.min(shoulder.dx, wrist.dx) - 18,
+      math.min(shoulder.dy, wrist.dy) - 12,
+      math.max(shoulder.dx, wrist.dx) + 18,
+      math.max(shoulder.dy, wrist.dy) + 24,
+    );
+    canvas.drawPath(
+      path.shift(const Offset(1, 4)),
+      Paint()
+        ..color = Colors.black.withValues(alpha: 0.34)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 26
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..shader = const LinearGradient(
+          colors: [Color(0xFFAC7055), Color(0xFFFFD0A5), Color(0xFFD28E6D)],
+        ).createShader(bounds)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 22
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round,
+    );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = const Color(0xFFFFE0C4).withValues(alpha: 0.52)
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..strokeCap = StrokeCap.round,
+    );
+  }
+
+  void _drawOpenHand(
+    Canvas canvas,
+    Offset wrist,
+    double angle,
+    bool leftHand,
+    double spread,
+    double curl,
+  ) {
+    canvas.save();
+    canvas.translate(wrist.dx, wrist.dy);
+    canvas.rotate(angle);
+
+    final centers = <double>[
+      -10.5 - spread,
+      -3.5 - spread / 3,
+      3.5 + spread / 3,
+      10.5 + spread,
+    ];
+    final tips = <double>[-52, -59, -58, -51].map((y) => y + curl).toList();
+    final hand = Path()
+      ..moveTo(-12, 8)
+      ..lineTo(-14, -24)
+      ..quadraticBezierTo(-15, -32, -11, -33);
+
+    for (var i = 0; i < centers.length; i++) {
+      final center = centers[i];
+      final left = center - 3.1;
+      final right = center + 3.1;
+      if (i > 0) hand.lineTo(left, -31);
+      hand
+        ..quadraticBezierTo(left, tips[i] + 7, center, tips[i])
+        ..quadraticBezierTo(right, tips[i] + 7, right, -30);
+    }
+    hand
+      ..lineTo(14, -23)
+      ..quadraticBezierTo(15, -12, 13, -4)
+      ..quadraticBezierTo(11, 6, 0, 8)
+      ..close();
+
+    final direction = leftHand ? -1.0 : 1.0;
+    final thumb = Path()
+      ..moveTo(direction * 10, -7)
+      ..quadraticBezierTo(direction * 24, -9, direction * 24, -19)
+      ..quadraticBezierTo(direction * 24, -27, direction * 18, -28)
+      ..quadraticBezierTo(direction * 14, -27, direction * 11, -19)
+      ..close();
+    final skin = Paint()
+      ..shader = const LinearGradient(
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+        colors: [Color(0xFFC27E60), Color(0xFFFFD2AA), Color(0xFFD18E6E)],
+      ).createShader(const Rect.fromLTRB(-28, -66, 28, 10));
+
+    // The thumb overlaps the palm; one connected outline contains all four fingers.
+    canvas.drawPath(
+      thumb.shift(const Offset(1, 3)),
+      Paint()..color = Colors.black.withValues(alpha: 0.18),
+    );
+    canvas.drawPath(thumb, skin);
+    canvas.drawPath(
+      hand.shift(const Offset(1, 3)),
+      Paint()..color = Colors.black.withValues(alpha: 0.22),
+    );
+    canvas.drawPath(hand, skin);
+
+    final creases = Paint()
+      ..color = const Color(0xFFAE7258).withValues(alpha: 0.8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.15
+      ..strokeCap = StrokeCap.round;
+    for (var i = 0; i < centers.length - 1; i++) {
+      final gap = (centers[i] + centers[i + 1]) / 2;
+      canvas.drawLine(Offset(gap, -27), Offset(gap, -13), creases);
+    }
+    canvas.drawArc(
+      const Rect.fromLTWH(-8, -4, 16, 10),
+      math.pi * 0.1,
+      math.pi * 0.8,
+      false,
+      creases,
+    );
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _AlignedSignerPainter oldDelegate) =>
+      oldDelegate.phase != phase || oldDelegate.activeTopic != activeTopic;
+}
+
 class MediaPage extends StatefulWidget {
-  const MediaPage({super.key});
+  const MediaPage({super.key, this.startInQuest = false});
+
+  final bool startInQuest;
 
   @override
   State<MediaPage> createState() => _MediaPageState();
@@ -1174,6 +1845,20 @@ class MediaPage extends StatefulWidget {
 
 class _MediaPageState extends State<MediaPage> {
   final ImagePicker _picker = ImagePicker();
+  final math.Random _random = math.Random();
+
+  static const List<String> _questWords = [
+    'good',
+    'hello',
+    'help',
+    'sorry',
+    'stop',
+    'study',
+    'thankyou',
+    'today',
+    'welcome',
+    'work',
+  ];
 
   Uint8List? _imageBytes;
   String? _videoName;
@@ -1183,6 +1868,202 @@ class _MediaPageState extends State<MediaPage> {
   bool _checkingHands = false;
   bool _recognizingVideo = false;
   String? _recognizedText;
+  bool _practiceMode = false;
+  String? _targetWord;
+  String? _questFeedback;
+  bool _roundComplete = false;
+  bool _roundWasCorrect = false;
+  int _questRound = 1;
+  int _questScore = 0;
+  int _questStreak = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.startInQuest) {
+      _practiceMode = true;
+      _targetWord = _questWords[_random.nextInt(_questWords.length)];
+    }
+  }
+
+  void _startQuest() {
+    setState(() {
+      _practiceMode = true;
+      _targetWord = _questWords[_random.nextInt(_questWords.length)];
+      _questRound = 1;
+      _questScore = 0;
+      _questStreak = 0;
+      _questFeedback = null;
+      _roundComplete = false;
+      _videoName = null;
+      _videoFile = null;
+      _imageBytes = null;
+      _imageUrl = null;
+      _detectionMessage = null;
+      _recognizedText = null;
+    });
+  }
+
+  void _exitQuest() {
+    setState(() {
+      _practiceMode = false;
+      _targetWord = null;
+      _questFeedback = null;
+      _roundComplete = false;
+      _videoName = null;
+      _videoFile = null;
+      _recognizedText = null;
+      _detectionMessage = null;
+    });
+  }
+
+  void _startNextQuestRound() {
+    final options = _questWords.where((word) => word != _targetWord).toList();
+    setState(() {
+      _targetWord = options[_random.nextInt(options.length)];
+      _questRound++;
+      _questFeedback = null;
+      _roundComplete = false;
+      _videoName = null;
+      _videoFile = null;
+      _recognizedText = null;
+      _detectionMessage = null;
+    });
+  }
+
+  String _canonicalWord(String value) =>
+      value.toLowerCase().replaceAll(RegExp(r'[\s_]+'), '');
+
+  Widget _buildQuestCard() {
+    final target = _targetWord ?? 'hello';
+    return Container(
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF282316), Color(0xFF171613)],
+        ),
+        border: Border.all(color: gold),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: const [
+          BoxShadow(color: Color(0x224D421F), blurRadius: 24, spreadRadius: 1),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.emoji_events_rounded, color: gold),
+              const SizedBox(width: 9),
+              const Expanded(
+                child: Text(
+                  'SIGN QUEST',
+                  style: TextStyle(
+                    color: goldLight,
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              Text(
+                'ROUND $_questRound',
+                style: const TextStyle(color: muted, fontSize: 12),
+              ),
+            ],
+          ),
+          const SizedBox(height: 18),
+          const Text(
+            'SIGN THIS WORD',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: muted,
+              fontSize: 11,
+              letterSpacing: 2,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            _friendlyLabel(target).toUpperCase(),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: goldLight,
+              fontSize: 42,
+              height: 1.1,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 10,
+            runSpacing: 8,
+            children: [
+              _QuestStat(label: 'SCORE', value: '$_questScore'),
+              _QuestStat(label: 'STREAK', value: '$_questStreak 🔥'),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Align(
+            alignment: Alignment.center,
+            child: TextButton.icon(
+              onPressed: () => _signSpeakSpeakText(_friendlyLabel(target)),
+              icon: const Icon(Icons.volume_up_rounded, size: 18),
+              label: const Text('Hear the word'),
+              style: TextButton.styleFrom(foregroundColor: goldLight),
+            ),
+          ),
+          if (_questFeedback != null) ...[
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                color: _roundWasCorrect
+                    ? const Color(0x2234C78A)
+                    : const Color(0x22D8B86C),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    _roundWasCorrect
+                        ? Icons.check_circle_rounded
+                        : Icons.lightbulb_outline_rounded,
+                    color: _roundWasCorrect ? const Color(0xFF65D6A4) : gold,
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _questFeedback!,
+                      style: const TextStyle(color: ivory, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ] else ...[
+            const SizedBox(height: 12),
+            const Text(
+              'Choose a short video of someone signing this word, then let SignSpeak check it.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: muted, height: 1.45),
+            ),
+          ],
+          if (_roundComplete) ...[
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: _startNextQuestRound,
+              icon: const Icon(Icons.arrow_forward_rounded),
+              label: const Text('Next sign'),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
 
   Future<void> _pickImage() async {
     final file = await _picker.pickImage(source: ImageSource.gallery);
@@ -1197,6 +2078,7 @@ class _MediaPageState extends State<MediaPage> {
       _imageUrl = file.path;
       _detectionMessage = null;
       _recognizedText = null;
+      if (_practiceMode && !_roundComplete) _questFeedback = null;
     });
   }
 
@@ -1211,10 +2093,11 @@ class _MediaPageState extends State<MediaPage> {
       _imageUrl = null;
       _detectionMessage = null;
       _recognizedText = null;
+      if (_practiceMode && !_roundComplete) _questFeedback = null;
     });
   }
 
-    Future<void> _checkForHands() async {
+  Future<void> _checkForHands() async {
     if (_imageUrl == null) return;
 
     setState(() {
@@ -1243,83 +2126,111 @@ class _MediaPageState extends State<MediaPage> {
       });
     }
   }
+
   Future<void> _recognizeVideo() async {
-  final video = _videoFile;
-  if (video == null) return;
-
-  setState(() {
-    _recognizingVideo = true;
-    _detectionMessage = null;
-    _recognizedText = null;
-  });
-
-  try {
-    final request = http.MultipartRequest(
-      'POST',
-      Uri.parse('http://127.0.0.1:8000/predict'),
-    );
-
-    request.files.add(
-      http.MultipartFile.fromBytes(
-        'file',
-        await video.readAsBytes(),
-        filename: video.name,
-      ),
-    );
-
-    final response = await request
-        .send()
-        .timeout(const Duration(minutes: 3));
-
-    final responseText = await response.stream
-        .bytesToString()
-        .timeout(const Duration(minutes: 3));
-
-    final decoded = jsonDecode(responseText);
-
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      final detail = decoded is Map ? decoded['detail'] : null;
-      throw Exception(detail ?? 'The Python service returned an error.');
-    }
-
-    if (decoded is! Map) {
-      throw const FormatException('Unexpected response from the service.');
-    }
-
-    final result = Map<String, dynamic>.from(decoded);
-    final rawLabel = (result['label'] ?? 'uncertain')
-        .toString()
-        .replaceAll('_', ' ');
-    final label = _friendlyLabel(rawLabel);
-    final scoreValue = result['confidence'];
-    final score = scoreValue is num ? scoreValue.toDouble() : 0.0;
-    final isSign = result['is_sign'] == true;
-
-    if (!mounted) return;
+    final video = _videoFile;
+    if (video == null) return;
 
     setState(() {
-      _recognizedText = isSign ? label : null;
-      _detectionMessage = isSign
-          ? 'Possible sign: ${label.toUpperCase()} '
-              '(${(score * 100).round()}% model score).'
-          : '${result['message'] ?? 'No confident sign prediction.'} '
-              '(${(score * 100).round()}% model score).';
+      _recognizingVideo = true;
+      _detectionMessage = null;
+      _recognizedText = null;
     });
-  } catch (error) {
-    if (!mounted) return;
 
-    setState(() {
-      _detectionMessage =
-          'Recognition failed. Check that the Python service is running. $error';
-    });
-  } finally {
-    if (mounted) {
+    try {
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('http://127.0.0.1:8001/predict'),
+      );
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          await video.readAsBytes(),
+          filename: video.name,
+        ),
+      );
+
+      final response = await request.send().timeout(const Duration(minutes: 3));
+
+      final responseText = await response.stream.bytesToString().timeout(
+        const Duration(minutes: 3),
+      );
+
+      final decoded = jsonDecode(responseText);
+
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        final detail = decoded is Map ? decoded['detail'] : null;
+        throw Exception(detail ?? 'The Python service returned an error.');
+      }
+
+      if (decoded is! Map) {
+        throw const FormatException('Unexpected response from the service.');
+      }
+
+      final result = Map<String, dynamic>.from(decoded);
+      final rawLabel = (result['label'] ?? 'uncertain').toString().replaceAll(
+        '_',
+        ' ',
+      );
+      final label = _friendlyLabel(rawLabel);
+      final scoreValue = result['confidence'];
+      final score = scoreValue is num ? scoreValue.toDouble() : 0.0;
+      final isSign = result['is_sign'] == true;
+
+      if (!mounted) return;
+
       setState(() {
-        _recognizingVideo = false;
+        _recognizedText = isSign ? label : null;
+        _detectionMessage = isSign
+            ? 'Possible sign: ${label.toUpperCase()} '
+                  '(${(score * 100).round()}% model score).'
+            : '${result['message'] ?? 'No confident sign prediction.'} '
+                  '(${(score * 100).round()}% model score).';
+
+        if (_practiceMode && _targetWord != null) {
+          if (isSign && _canonicalWord(label) == _canonicalWord(_targetWord!)) {
+            _roundWasCorrect = true;
+            _roundComplete = true;
+            _questScore += 10;
+            _questStreak++;
+            _questFeedback =
+                'Correct! You earned 10 points. Keep your streak going.';
+          } else if (isSign) {
+            _roundWasCorrect = false;
+            _roundComplete = true;
+            _questStreak = 0;
+            _questFeedback =
+                'The model predicted “${label.toUpperCase()}”. '
+                'The target was “${_friendlyLabel(_targetWord!).toUpperCase()}”.';
+          } else {
+            _roundWasCorrect = false;
+            _roundComplete = false;
+            _questFeedback =
+                'The model was unsure. Try another clear clip of this sign.';
+          }
+        }
       });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _detectionMessage =
+            'Recognition failed. Check that the Python service is running. $error';
+        if (_practiceMode) {
+          _roundWasCorrect = false;
+          _roundComplete = false;
+          _questFeedback = 'Could not check this clip. Your score is unchanged; try again when the service is available.';
+        }
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _recognizingVideo = false;
+        });
+      }
     }
   }
-}
 
   String _friendlyLabel(String label) {
     final normalized = label.toLowerCase().trim();
@@ -1341,8 +2252,23 @@ class _MediaPageState extends State<MediaPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ISL Media'),
+        title: Text(_practiceMode ? 'Sign Quest' : 'ISL Media'),
         backgroundColor: const Color(0xFF080B16),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 10),
+            child: TextButton.icon(
+              onPressed: _practiceMode ? _exitQuest : _startQuest,
+              icon: Icon(
+                _practiceMode
+                    ? Icons.close_rounded
+                    : Icons.emoji_events_outlined,
+              ),
+              label: Text(_practiceMode ? 'Exit Quest' : 'Sign Quest'),
+              style: TextButton.styleFrom(foregroundColor: goldLight),
+            ),
+          ),
+        ],
       ),
       body: Center(
         child: ConstrainedBox(
@@ -1352,29 +2278,45 @@ class _MediaPageState extends State<MediaPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Choose signing media',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                Text(
+                  _practiceMode
+                      ? 'Ready for a challenge?'
+                      : 'Choose signing media',
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  'Select a photo or a short video of someone signing.',
-                  style: TextStyle(color: Color(0xFF929DB4), height: 1.5),
+                Text(
+                  _practiceMode
+                      ? 'Sign the target word and submit a short video to earn points.'
+                      : 'Select a photo or a short video of someone signing.',
+                  style: const TextStyle(color: Color(0xFF929DB4), height: 1.5),
                 ),
+                if (_practiceMode) ...[
+                  const SizedBox(height: 20),
+                  _buildQuestCard(),
+                ],
                 const SizedBox(height: 24),
                 Wrap(
                   spacing: 12,
                   runSpacing: 12,
                   children: [
-                    FilledButton.icon(
-                      onPressed: _pickImage,
-                      icon: const Icon(Icons.image_outlined),
-                      label: const Text('Choose image'),
-                    ),
+                    if (!_practiceMode)
+                      FilledButton.icon(
+                        onPressed: _pickImage,
+                        icon: const Icon(Icons.image_outlined),
+                        label: const Text('Choose image'),
+                      ),
                     OutlinedButton.icon(
-                      onPressed: _pickVideo,
+                      onPressed: (_roundComplete || _recognizingVideo)
+                          ? null
+                          : _pickVideo,
                       icon: const Icon(Icons.video_library_outlined),
-                      label: const Text('Choose video'),
+                      label: Text(
+                        _practiceMode ? 'Choose signing clip' : 'Choose video',
+                      ),
                     ),
                   ],
                 ),
@@ -1390,44 +2332,39 @@ class _MediaPageState extends State<MediaPage> {
                   child: _imageBytes != null
                       ? Image.memory(_imageBytes!, fit: BoxFit.contain)
                       : _videoName != null
-                          ? Center(
-                              child: Padding(
-                                padding: const EdgeInsets.all(24),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.video_file_outlined,
-                                      size: 54,
-                                      color: Color(0xFF58E8F7),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Text(
-                                      _videoName!,
-                                      textAlign: TextAlign.center,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    const Text(
-                                      'Choose Recognize sign video below to process this clip.',
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        color: Color(0xFF929DB4),
-                                      ),
-                                    ),
-                                  ],
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.video_file_outlined,
+                                  size: 54,
+                                  color: Color(0xFF58E8F7),
                                 ),
-                              ),
-                            )
-                          : const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(24),
-                                child: Text(
-                                  'Your selected media will appear here.',
+                                const SizedBox(height: 12),
+                                Text(_videoName!, textAlign: TextAlign.center),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  'Choose Recognize sign video below to process this clip.',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(color: Color(0xFF929DB4)),
                                 ),
-                              ),
+                              ],
                             ),
+                          ),
+                        )
+                      : const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(24),
+                            child: Text(
+                              'Your selected media will appear here.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Color(0xFF929DB4)),
+                            ),
+                          ),
+                        ),
                 ),
                 if (_recognizedText != null) ...[
                   const SizedBox(height: 18),
@@ -1495,16 +2432,24 @@ class _MediaPageState extends State<MediaPage> {
                   ),
                 ],
                 if (_videoFile != null) ...[
-  const SizedBox(height: 16),
-  FilledButton.icon(
-    onPressed: _recognizingVideo ? null : _recognizeVideo,
-    icon: const Icon(Icons.translate_rounded),
-    label: Text(
-      _recognizingVideo ? 'Recognizing…' : 'Recognize sign video',
-    ),
-  ),
-],
-                if (_detectionMessage != null && _recognizedText == null) ...[
+                  const SizedBox(height: 16),
+                  FilledButton.icon(
+                    onPressed: (_recognizingVideo || _roundComplete)
+                        ? null
+                        : _recognizeVideo,
+                    icon: const Icon(Icons.translate_rounded),
+                    label: Text(
+                      _recognizingVideo
+                          ? 'Recognizing…'
+                          : _practiceMode
+                          ? 'Check my sign'
+                          : 'Recognize sign video',
+                    ),
+                  ),
+                ],
+                if (_detectionMessage != null &&
+                    _recognizedText == null &&
+                    !_practiceMode) ...[
                   const SizedBox(height: 12),
                   Text(
                     _detectionMessage!,
@@ -1513,10 +2458,15 @@ class _MediaPageState extends State<MediaPage> {
                   ),
                 ],
                 const SizedBox(height: 18),
-                const Text(
-                  'Image hand-checking is separate. Sign predictions use short videos.',
+                Text(
+                  _practiceMode
+                      ? 'A correct, confident match earns 10 points. A streak earns bragging rights.'
+                      : 'Image hand-checking is separate. Sign predictions use short videos.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Color(0xFF929DB4), fontSize: 13),
+                  style: const TextStyle(
+                    color: Color(0xFF929DB4),
+                    fontSize: 13,
+                  ),
                 ),
               ],
             ),
@@ -1525,7 +2475,50 @@ class _MediaPageState extends State<MediaPage> {
       ),
     );
   }
-}class _Footer extends StatelessWidget {
+}
+
+class _QuestStat extends StatelessWidget {
+  const _QuestStat({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+      decoration: BoxDecoration(
+        color: const Color(0xFF11100D),
+        border: Border.all(color: const Color(0xFF574A2B)),
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: muted,
+              fontSize: 10,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          const SizedBox(width: 9),
+          Text(
+            value,
+            style: const TextStyle(
+              color: goldLight,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Footer extends StatelessWidget {
   const _Footer();
 
   @override
@@ -1534,9 +2527,7 @@ class _MediaPageState extends State<MediaPage> {
       width: double.infinity,
       padding: const EdgeInsets.only(top: 20),
       decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Color(0xFF403925)),
-        ),
+        border: Border(top: BorderSide(color: Color(0xFF403925))),
       ),
       child: const Row(
         children: [

@@ -37,6 +37,78 @@ POSE_MODEL_URL = (
 
 SEQUENCE_LENGTH = 20
 FEATURE_COUNT = 226
+def normalize_hand(hand_values):
+    """
+    Make hand landmarks independent of camera position and size.
+    """
+
+    if np.all(hand_values == 0):
+        return hand_values
+
+    wrist = hand_values[0]
+
+    hand_values = hand_values - wrist
+
+    reference = np.linalg.norm(
+        hand_values[9] - hand_values[0]
+    )
+
+    if reference > 1e-6:
+        hand_values = hand_values / reference
+
+    return hand_values
+
+
+def normalize_pose(pose_values):
+    """
+    Make pose landmarks independent of body position.
+    """
+
+    if np.all(pose_values == 0):
+        return pose_values
+
+    left_shoulder = pose_values[11, :3]
+    right_shoulder = pose_values[12, :3]
+
+    center = (left_shoulder + right_shoulder) / 2
+
+    pose_values[:, :3] = pose_values[:, :3] - center
+
+    shoulder_width = np.linalg.norm(
+        left_shoulder - right_shoulder
+    )
+
+    if shoulder_width > 1e-6:
+        pose_values[:, :3] = (
+            pose_values[:, :3] / shoulder_width
+        )
+
+    return pose_values
+
+
+def augment_sequence(sequence):
+    """
+    Small safe augmentation.
+    """
+
+    augmented = sequence.copy()
+
+    noise = np.random.normal(
+        0,
+        0.005,
+        augmented.shape
+    )
+
+    augmented += noise.astype(np.float32)
+
+    scale = np.random.uniform(
+        0.95,
+        1.05
+    )
+
+    augmented *= scale
+
+    return augmented.astype(np.float32)
 
 
 def download_model_if_needed(model_path, model_url):
@@ -130,6 +202,13 @@ def get_frame_features(rgb_frame, timestamp_ms, hand_detector, pose_detector):
                 point.z,
                 float(visibility),
             ]
+
+    # Match the exact normalization used by api.py at prediction time.
+    # Without this, training sees raw camera coordinates while prediction
+    # sees wrist- and shoulder-normalized landmarks.
+    hand_values[0] = normalize_hand(hand_values[0])
+    hand_values[1] = normalize_hand(hand_values[1])
+    pose_values = normalize_pose(pose_values)
 
     # 126 hand numbers + 100 body numbers = 226 numbers per frame.
     features = np.concatenate(
