@@ -103,13 +103,19 @@ app = FastAPI(
     title="SignSpeak local sign recognition service"
 )
 
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
+    allow_origins=[
+        "http://localhost",
+        "http://127.0.0.1",
+        "https://resilient-macaron-81ae77.netlify.app",
+    ],
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 def get_frame_features(
