@@ -108,9 +108,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://resilient-macaron-81ae77.netlify.app",
-        "http://localhost:3000",
-        "http://localhost:8080",
     ],
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
