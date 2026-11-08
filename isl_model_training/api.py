@@ -7,6 +7,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import tensorflow as tf
+tf.config.set_visible_devices([], 'GPU')
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
