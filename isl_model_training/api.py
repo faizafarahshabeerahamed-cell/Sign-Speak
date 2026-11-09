@@ -6,10 +6,16 @@ from pathlib import Path
 import cv2
 import mediapipe as mp
 import numpy as np
+import os
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "2"
+os.environ["TF_NUM_INTRAOP_THREADS"] = "1"
+os.environ["TF_NUM_INTEROP_THREADS"] = "1"
 import tensorflow as tf
 tf.config.set_visible_devices([], 'GPU')
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+import gc
+import threading
 
 # Find the trained model and label list.
 BASE_DIR = Path(__file__).resolve().parent
@@ -104,6 +110,7 @@ app = FastAPI(
     title="SignSpeak local sign recognition service"
 )
 
+predict_lock = threading.Lock()
 
 app.add_middleware(
     CORSMiddleware,
@@ -404,12 +411,8 @@ def predict(
                 temporary_file,
             )
 
-        (
-            sequence,
-            hands_seen,
-        ) = extract_video_sequence(
-            temporary_path
-        )
+        with predict_lock:
+            sequence, hands_seen = extract_video_sequence(temporary_path)
 
         if not hands_seen:
             return {
@@ -420,13 +423,10 @@ def predict(
                 "message": "No hands were detected in this video.",
             }
 
-        probabilities = model.predict(
-            np.expand_dims(
-                sequence,
-                axis=0,
-            ),
-            verbose=0,
-        )[0]
+        probabilities = model(
+                np.expand_dims(sequence, axis=0),
+                training=False,
+        ).numpy()[0]
 
         best_index = int(
             np.argmax(probabilities)
@@ -482,6 +482,7 @@ def predict(
         ) from error
 
     finally:
+        gc.collect()
         file.file.close()
 
         if temporary_path is not None:
