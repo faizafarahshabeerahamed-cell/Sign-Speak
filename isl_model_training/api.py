@@ -321,10 +321,15 @@ def extract_video_sequence(video_path):
                 if not success:
                     continue
 
+                height, width = frame.shape[:2]
+                if width > 640:
+                    scale = 640 / width
+                    frame = cv2.resize(frame, (640, int(height * scale)))
+
                 rgb_frame = cv2.cvtColor(
                     frame,
                     cv2.COLOR_BGR2RGB,
-                )
+             )
 
                 timestamp_ms = (
                     sample_index * 40
